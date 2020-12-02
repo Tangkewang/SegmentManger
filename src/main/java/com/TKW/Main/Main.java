@@ -20,9 +20,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class Main {
 
-    private static String ip ="62.210.249.200";
-    private static String userName ="root";
-    private static String userPwd ="Phliyundi888999";
+    private static String ip ="";
+    private static String userName ="";
+    private static String userPwd ="";
     private static Map<String,SegmentManager> taskMap = new ConcurrentHashMap<>();
 
     private static List<String> filmList = new ArrayList<>();

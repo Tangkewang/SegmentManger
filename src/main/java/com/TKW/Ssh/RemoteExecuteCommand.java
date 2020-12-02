@@ -31,9 +31,9 @@ public class RemoteExecuteCommand {
     //字符编码默认是utf-8
     private static String DEFAULTCHART = "UTF-8";
     private Connection conn;
-    private String ip ="62.210.249.200";
-    private String userName ="root";
-    private String userPwd ="Phliyundi888999";
+    private String ip ="";
+    private String userName ="";
+    private String userPwd ="";
 
     public RemoteExecuteCommand(String ip, String userName, String userPwd) {
         this.ip = ip;
