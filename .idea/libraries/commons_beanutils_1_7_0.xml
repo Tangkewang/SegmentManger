@@ -1,0 +1,14 @@
+<component name="libraryTable">
+  <library name="commons-beanutils-1.7.0">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/Downloads/写博客用的资源分享/JSONJAR/commons-beanutils-1.7.0.jar!/" />
+      <root url="jar://$USER_HOME$/Downloads/写博客用的资源分享/JSONJAR/commons-collections-3.1.jar!/" />
+      <root url="jar://$USER_HOME$/Downloads/写博客用的资源分享/JSONJAR/commons-lang-2.5(1).jar!/" />
+      <root url="jar://$USER_HOME$/Downloads/写博客用的资源分享/JSONJAR/commons-logging.jar!/" />
+      <root url="jar://$USER_HOME$/Downloads/写博客用的资源分享/JSONJAR/ezmorph-1.0.3.jar!/" />
+      <root url="jar://$USER_HOME$/Downloads/写博客用的资源分享/JSONJAR/json-lib-2.1-jdk15.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
