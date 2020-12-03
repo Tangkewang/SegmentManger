@@ -187,5 +187,16 @@ public class M3u8 {
             return false;
         }
     }
+
+    public static boolean m3u8Over(String m3u8Url){
+        String s = readFileContent(m3u8Url);
+        String[] split = s.split("\n");
+        for (int i = 0; i < split.length; i++) {
+            if (split[i].contains("#EXT-X-ENDLIST")){
+                return true;
+            }
+        }
+        return  false;
+    }
 }
 

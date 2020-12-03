@@ -1,10 +1,7 @@
 package com.TKW.Ssh;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.TKW.Data.HttpBackMessage.BitTorrent;
 import lombok.Data;
+import lombok.SneakyThrows;
 import org.apache.commons.lang.StringUtils;
 import ch.ethz.ssh2.Connection;
 import ch.ethz.ssh2.Session;
@@ -77,6 +75,7 @@ public class RemoteExecuteCommand {
                 Session session = conn.openSession();//打开一个会话
                 session.execCommand(cmd);//执行命令
                 result = processStdout(session.getStdout(), DEFAULTCHART);
+                System.out.println(result);
                 //如果为得到标准输出为空，说明脚本执行出错了
                 if (StringUtils.isBlank(result)) {
                     result = processStdout(session.getStderr(), DEFAULTCHART);
@@ -95,25 +94,39 @@ public class RemoteExecuteCommand {
      * @param cmd 返回 命令行打印的数据
      * @return
      */
-    public String localExecute(String cmd) {
-        System.out.println("当前执行的 cmd +" + cmd);
-        String result = "";
-        if (login()) {
+    public void localExecute(String cmd) throws IOException {
+      new Thread(new Runnable() {
+            @SneakyThrows
+            @Override
+            public void run() {
+                ProcessBuilder pb = new ProcessBuilder("bash","-c",cmd);
+                pb.redirectErrorStream(true);
+                Process process = pb.start();
+                readProcessOutput(process.getInputStream(), System.out);
+            }
+        }).start();
+
+    }
+
+    private static void readProcessOutput(InputStream inputStream, PrintStream out) {
+        try {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, Charset.forName("GBK")));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                System.out.println(line);
+            }
+            System.out.println("-end");
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
             try {
-                Process process = Runtime.getRuntime().exec(cmd);
-                InputStream inputStream = process.getInputStream();
-                result = processStdout(inputStream, DEFAULTCHART);
-//            //如果为得到标准输出为空，说明脚本执行出错了
-//            if (StringUtils.isBlank(result)) {
-//                result = processStdout(inputStream, DEFAULTCHART);
-//            }
+                inputStream.close();
             } catch (IOException e) {
-                System.out.println("当前执行 cmd命令：" + cmd + "错误");
-                log.error("当前执行 cmd命令：" + cmd + "错误");
+                e.printStackTrace();
             }
         }
-        return result;
     }
+
     /**
      * @param cmd 即将执行的命令
      * @return 命令执行成功后返回的结果值，如果命令执行失败，返回空字符串，不是null
@@ -122,6 +135,7 @@ public class RemoteExecuteCommand {
      * @since V0.1
      */
     public String executeSuccess(String cmd) {
+        System.out.println("执行的是 success命令"+cmd);
         String result = "";
         try {
             if (login()) {
@@ -137,9 +151,15 @@ public class RemoteExecuteCommand {
         return result;
     }
 
+    public void segment(String cmd){
+      Thread A =  new Thread(()->{
+          execute(cmd);
+        });
+      A.start();
+    }
+
     /**
      * 解析脚本执行返回的结果集
-     *
      * @param in      输入流对象
      * @param charset 编码
      * @return 以纯文本的格式返回
@@ -149,7 +169,6 @@ public class RemoteExecuteCommand {
     private String processStdout(InputStream in, String charset) {
         InputStream stdout = new StreamGobbler(in);
         StringBuffer buffer = new StringBuffer();
-        ;
         try {
             BufferedReader br = new BufferedReader(new InputStreamReader(stdout, charset));
             String line = null;

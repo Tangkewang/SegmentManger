@@ -19,8 +19,9 @@ public class MinioUtil {
     private  static MinioClient minioclient;
 
     public MinioUtil(String END_POINT,String ACCESS_KEY, String SECRET_KEY) {
+        String ip = "http://"+ END_POINT+":9000";
         try {
-            minioclient =new MinioClient(END_POINT,ACCESS_KEY,SECRET_KEY);
+            minioclient = new MinioClient(ip,ACCESS_KEY,SECRET_KEY);
         } catch (InvalidEndpointException e) {
             e.printStackTrace();
         } catch (InvalidPortException e) {
@@ -35,7 +36,7 @@ public class MinioUtil {
      * @param suffix       后缀
      * @param fileUrl      文件路径
      */
-    public static void push(String packageName, String fileName , String suffix, String fileUrl) {
+    public void push(String packageName, String fileName, String suffix, String fileUrl) throws IOException, InvalidKeyException, NoSuchAlgorithmException, InsufficientDataException, InvalidArgumentException, InternalException, NoResponseException, InvalidBucketNameException, XmlPullParserException, ErrorResponseException {
         try {
             boolean isExist =minioclient.bucketExists(packageName);
             if (isExist){
@@ -46,39 +47,8 @@ public class MinioUtil {
         }catch (Exception e){
             log.error(e.getMessage());
         }
-        try {
-            minioclient.putObject(packageName,fileName+"."+suffix,fileUrl);
-        } catch (InvalidBucketNameException e) {
-            log.error(e.getMessage());
-            // e.printStackTrace();
-        } catch (NoSuchAlgorithmException e) {
-            log.error(e.getMessage());
-            //  e.printStackTrace();
-        } catch (InsufficientDataException e) {
-            log.error(e.getMessage());
-            // e.printStackTrace();
-        } catch (IOException e) {
-            log.error(e.getMessage());
-            // e.printStackTrace();
-        } catch (InvalidKeyException e) {
-            log.error(e.getMessage());
-            // e.printStackTrace();
-        } catch (NoResponseException e) {
-            log.error(e.getMessage());
-            //  e.printStackTrace();
-        } catch (XmlPullParserException e) {
-            log.error(e.getMessage());
-            // e.printStackTrace();
-        } catch (ErrorResponseException e) {
-            log.error(e.getMessage());
-            //  e.printStackTrace();
-        } catch (InternalException e) {
-            log.error(e.getMessage());
-            // e.printStackTrace();
-        } catch (InvalidArgumentException e) {
-            log.error(e.getMessage());
-            // e.printStackTrace();
-        }
+        minioclient.putObject(packageName,fileName+"."+suffix,fileUrl);
+
         log.info(fileUrl+fileName+"."+suffix+"插入成功");
     }
 

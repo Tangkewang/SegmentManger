@@ -78,13 +78,17 @@ public class Segment {
         String orginName = firstFilmUrl.substring(i + 1);
 
         List<String> cmd = new ArrayList<>();
+//        cmd.add("sudo");
+//        cmd.add("-p");
+//        cmd.add("Phliyundi888999");
+//        cmd.add("bash");
+//        cmd.add("-c");
         cmd.add("cd");
         cmd.add(orginRootPath);
-
-        cmd.add("&&");
+        cmd.add(";");
         cmd.add("ffmpeg");
         cmd.add("-i");
-        cmd.add("\"" + orginName + "\"");
+        cmd.add("\""+  orginName + "\"");
 
 
         if (!subtitleUrl.equals("")) {

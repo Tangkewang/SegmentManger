@@ -44,4 +44,9 @@ public class SegmentManager {
      */
     private String subtitleSuffix;
 
+    /**
+     * 种子原视频文件的 大小
+     */
+    private String filmSize;
+
 }

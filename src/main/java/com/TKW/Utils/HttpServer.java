@@ -54,22 +54,27 @@ public class HttpServer {
      * @return
      * @throws IOException
      */
-    public static String updateState(HttpBackMessage httpBackMessage) throws IOException {
-        String url = ip +"taskState";
-        System.out.println(url);
-        OkHttpClient okHttpClient = new OkHttpClient();
+    public static String updateState(HttpBackMessage httpBackMessage) {
+        try {
+            String url = ip +"taskState";
+            System.out.println(url);
+            OkHttpClient okHttpClient = new OkHttpClient();
 
-        Request request = new Request.Builder()
-                .url(url)
-                .addHeader("content-type","application/json;charset:utf-8")
-                .post(RequestBody.create(JSON,GsonUtils.toJson(httpBackMessage)))
-                .build();
+            Request request = new Request.Builder()
+                    .url(url)
+                    .addHeader("content-type","application/json;charset:utf-8")
+                    .post(RequestBody.create(JSON,GsonUtils.toJson(httpBackMessage)))
+                    .build();
 
 
-        Response response = okHttpClient.newCall(request).execute();
+            Response response = okHttpClient.newCall(request).execute();
 
-        String html = response.body().string();
+            String html = response.body().string();
+            return html;
 
-        return html;
+        }catch (Exception e){
+
+        }
+      return null;
     }
 }

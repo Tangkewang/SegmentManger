@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 
 public class CommandUtil {
     public static String run(String command)  {
+        System.out.println("开始执行cmd"+command);
         Scanner input = null;
         String result = "";
         Process process = null;
