@@ -1,4 +1,5 @@
 package com.TKW.Data.HttpBackMessage;
+import com.TKW.FilmCrawler.Film;
 import com.TKW.Utils.GsonUtils;
 import com.google.gson.Gson;
 
@@ -287,6 +288,22 @@ public class HttpBackBuilder {
         return backMessage;
     }
 
+    /**
+     * 电影 基础信息得的 返回数据
+     * @param film   电影基础信息类
+     * @param filmId  电影id
+     * @return
+     */
+    public static HttpBackMessage buildFilmBasicMess(Film film,String filmId ){
+        HttpBackMessage backMessage = new HttpBackMessage();
+
+        backMessage.setCode(1212);
+        backMessage.setData(GsonUtils.toJson(film));
+        backMessage.setFilmId(filmId);
+
+        return backMessage;
+    }
+
 
     /**
      * 根据 分辨率 判断更新 上传状态
@@ -299,12 +316,6 @@ public class HttpBackBuilder {
         HttpBackMessage httpBackMessage = null;
         switch (power){
             case 3:
-//                if (minioBackMessage!=null){
-//
-//                    break;;
-//                }else {
-//                    httpBackMessage=  build720UploadState(filmId,null);
-//                }
                 httpBackMessage = build720UploadState(filmId, minioBackMessage);
             case 2:
                 httpBackMessage= build480UploadState(filmId,minioBackMessage);

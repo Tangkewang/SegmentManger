@@ -75,17 +75,4 @@ public class FileViewer {
         return fileSizeString;
     }
 
-    public static void main(String[] args) {
-        File file = new File("C:\\Users\\NING MEI\\Desktop\\FFmpeg切片测试");
-        List<String> list = getListFiles("C:\\Users\\NING MEI\\Desktop\\FFmpeg切片测试", "", true);
-        for (String fileName : list) {
-            System.out.println(fileName);
-        }
-        System.out.println(list.size());
-        try {
-            System.out.println(FormetFileSize(getFileSize(file)));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 }

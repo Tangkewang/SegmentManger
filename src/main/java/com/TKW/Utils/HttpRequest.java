@@ -1,27 +1,13 @@
 package com.TKW.Utils;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.net.URL;
-import java.net.URLConnection;
-import java.util.List;
-import java.util.Map;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.URL;
 import java.io.File;
-import java.io.IOException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 
 public class HttpRequest {
 //    public static void main(String[] args) {
@@ -41,8 +27,9 @@ public class HttpRequest {
      * @param fileName
      * @param savePath
      * @throws IOException
+     * @return
      */
-    public static void downLoadFromUrl(String urlStr,String fileName,String savePath) throws IOException{
+    public static String downLoadFromUrl(String urlStr, String fileName, String savePath) throws IOException{
         URL url = new URL(urlStr);
         HttpURLConnection conn = (HttpURLConnection)url.openConnection();
         //设置超时间为3秒
@@ -72,8 +59,7 @@ public class HttpRequest {
         }
 
 
-        System.out.println("info:"+url+" download success");
-
+        return saveDir+File.separator+fileName;
     }
 
 

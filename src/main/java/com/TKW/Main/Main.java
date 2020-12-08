@@ -2,9 +2,13 @@ package com.TKW.Main;
 
 import com.TKW.Data.HttpBackMessage.BitTorrent;
 import com.TKW.Data.HttpBackMessage.HttpBackBuilder;
+import com.TKW.Data.HttpBackMessage.HttpBackMessage;
 import com.TKW.Data.HttpBackMessage.MinioBackMessage;
 import com.TKW.Data.HttpReceiveMess.MinioServer;
 import com.TKW.Data.HttpReceiveMess.SegmentManager;
+import com.TKW.FilmCrawler.Crawler;
+import com.TKW.FilmCrawler.DownlaodAndPushMinio;
+import com.TKW.FilmCrawler.Film;
 import com.TKW.M3u8.M3u8;
 import com.TKW.Minio.MinioUtil;
 import com.TKW.Segment.ResolvingPower;
@@ -14,7 +18,7 @@ import com.TKW.Utils.*;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import lombok.SneakyThrows;
-import net.sf.json.JSONArray;
+
 
 import java.io.File;
 import java.io.IOException;
@@ -27,9 +31,9 @@ import static com.TKW.Utils.FileViewer.getFileSize;
 
 public class Main {
 
-    private static String ip = "";
-    private static String userName = "";
-    private static String userPwd = "";
+    private static String ip = "62.29.200";
+    private static String userName = "root";
+    private static String userPwd = "Phli8999";
     /**
      * 电影id 和 http请求的消息体
      */
@@ -44,17 +48,48 @@ public class Main {
     private static RemoteExecuteCommand remoteExecuteCommand = new RemoteExecuteCommand(ip, userName, userPwd);
 
     public static void main(String[] args) throws Exception {
-//        while (true){
-//            if (taskMap.size()<=5){
-//            }
-//        }
+        /**
+         * 判断任务列表 请求 开始新任务
+         */
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    if (taskMap.size() <= 5) {
+                        try {
+                            seekTaskFromHttpServer();
+                        } catch (InterruptedException | IOException e) {
+                            e.printStackTrace();
+                        }
+                        break;
+                    } else {
+                        try {
+                            Thread.sleep(10000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+        }).start();
 
-        seekTaskFromHttpServer();
+        /**
+         * 判断任务列表 开始切片任务
+         */
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    updateState();
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
 
-
-//        while (true) {
-        updateState();
-//        }
     }
 
     /**
@@ -71,9 +106,28 @@ public class Main {
             e.printStackTrace();
         }
 
+//        String mess ="{\"filmId\":\"mt9hdCAjlm\",\"btUrl\":\"https://pt.m-team.cc/download.php?id\\u003d444860\\u0026passkey\\u003d9f1e9849aa4d5eb1daa7f313c47c794b\\u0026ipv6\\u003d1\\u0026https\\u003d1\",\"subtitleUrl\":\"\",\"resolvingPower\":\"720P\",\"msg\":{\"720P\":\"[{ip\\u003d162.245.236.170, accessKey\\u003dHSCBKASDKLKL, secretKey\\u003dASNXCJNASJnjksancascjnkjasc}]\"},\"subtitleSuffix\":\"srt\"}\n";
 //        SegmentManager segmentManager = GsonUtils.fromJson(mess, SegmentManager.class);
 
         if (segmentManager != null) {
+            String douBanId = segmentManager.getDouBanId();
+            if (douBanId != null){
+                Film film = Crawler.start(douBanId);
+
+                String s = HttpServer.updateState(HttpBackBuilder.buildFilmBasicMess(film, segmentManager.getFilmId()));
+
+                HttpBackMessage httpBackMessage = GsonUtils.fromJson(s, HttpBackMessage.class);
+                String filmId = httpBackMessage.getFilmId();
+                String filmCoverImage = film.getFilmCoverImage();
+
+                try {
+                    DownlaodAndPushMinio.start(filmCoverImage,filmId);
+                }catch (Exception e){
+
+                    System.out.println("下载上传 错误 +"+e.getMessage());
+                }
+            }
+
             String btUrl = segmentManager.getBtUrl();
             String filmId = segmentManager.getFilmId();
             String btDownloadName = null;
@@ -91,6 +145,7 @@ public class Main {
             }
 
             taskMap.put(filmId, segmentManager);
+
             filmList.add(filmId);
             filmIdBtNameMap.put(filmId, btDownloadName);
             if (remoteExecuteCommand.startBtCmd(btUrl)) {
@@ -99,6 +154,16 @@ public class Main {
         }
 
         return false;
+    }
+
+    /**
+     * 从 任务map 中将任务删除
+     * @param filmId
+     */
+    private static void deleteTaskMap(String filmId) {
+        taskMap.remove(filmId);
+        filmList.remove(filmId);
+        filmIdBtNameMap.remove(filmId);
     }
 
     /**
@@ -118,6 +183,7 @@ public class Main {
             HttpServer.updateState(HttpBackBuilder.buildBtState(filmId, bitTorrent));
 
             if (bitTorrent.getDone().contains("100%")) {
+                deleteTaskMap(filmId);
                 System.out.println("开始执行:" + bitTorrent.getName() + bitTorrent.getDone());
                 SegmentManager segmentManager = taskMap.get(filmList.get(i));
 
@@ -208,12 +274,12 @@ public class Main {
     /**
      * 根据 m3u8文件的全路径 上传所有的切片文件到 桶服务器中
      *
-     * @param m3u8Path
-     * @param minioServer
+     * @param m3u8Path    m3u8 文件 的全路径
+     * @param minioServer minio信息的类
+     * @param filmId      电影id
+     * @param power       需要上传的分辨率
      */
     public static void minioPush(String m3u8Path, MinioServer minioServer, String filmId, int power) {
-
-
         HttpServer.updateState(HttpBackBuilder.buildUploadState(filmId, null, power));
 
         String ip = minioServer.getIp();
@@ -223,6 +289,8 @@ public class Main {
 
         int i = m3u8Path.lastIndexOf("/");
         String m3u8RootPath = m3u8Path.substring(0, i);
+
+        String m3u8Suffix = m3u8Path.substring(i + 1);
         List<String> listFiles = FileViewer.getListFiles(m3u8RootPath, "", true);
         MinioUtil minioUtil = new MinioUtil(ip, accessKey, secretKey);
 
@@ -232,32 +300,43 @@ public class Main {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        try {
-            for (String file : listFiles) {
-                int nameIndex = file.lastIndexOf("/");
-                String nameSuffix = file.substring(nameIndex + 1);
-                int suffixIndex = nameSuffix.lastIndexOf(".");
-                String name = nameSuffix.substring(0, suffixIndex);
-                String suffix = nameSuffix.substring(suffixIndex + 1);
-
-                System.out.println("开始上传+" + name);
-                minioUtil.push("film", filmId + "/" + name, suffix, file);
-            }
-        } catch (Exception e) {
-            HttpServer.updateState(HttpBackBuilder.buildUploadError(filmId, power));
-        }
+//        try {
+//            for (String file : listFiles) {
+//                int nameIndex = file.lastIndexOf("/");
+//                String nameSuffix = file.substring(nameIndex + 1);
+//                int suffixIndex = nameSuffix.lastIndexOf(".");
+//                String name = nameSuffix.substring(0, suffixIndex);
+//                String suffix = nameSuffix.substring(suffixIndex + 1);
+//
+//                System.out.println("开始上传+" + name);
+//                minioUtil.push("film", filmId + "/" + name, suffix, file);
+//            }
+//        } catch (Exception e) {
+//            HttpServer.updateState(HttpBackBuilder.buildUploadError(filmId, power));
+//        }
+        //线程处理 minio上传
+        MinioUtil.startPoll(listFiles,minioUtil,filmId);
 
         MinioBackMessage minioBackMessage = new MinioBackMessage();
 
         minioBackMessage.setActualSize(allSize);
         minioBackMessage.setOriginalSize(taskMap.get(filmId).getFilmSize());
+        minioBackMessage.setUrl("http://" + ip + "/film" + "/" + filmId + "/" + m3u8Suffix);
+
         HttpServer.updateState(HttpBackBuilder.buildUploadState(filmId, minioBackMessage, power));
 
     }
 
-    public static void dealM3u8(String M3U8Path, MinioServer minioServer, String filmId, int power) throws IOException {
-
-
+    /**
+     * 判断 切片是否完成 进行 m3u8格式话 上传桶（minio）
+     *
+     * @param M3U8Path    m3u8 文件 的全路径
+     * @param minioServer minio信息的类
+     * @param filmId      电影id
+     * @param power       需要上传的分辨率
+     * @throws IOException
+     */
+    public static void dealM3u8(String M3U8Path, MinioServer minioServer, String filmId, int power) {
         new Thread(new Runnable() {
             @SneakyThrows
             @Override
@@ -289,11 +368,10 @@ public class Main {
                         }
                     }
                 }
-
             }
-
         }).start();
     }
+
 
     /**
      * 解析 info 中的 桶的

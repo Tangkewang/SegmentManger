@@ -6,22 +6,10 @@ import java.util.List;
 
 public class M3u8 {
 
-
-    public static void main(String[] args) {
-        String filePath = "C:\\Users\\NING MEI\\Desktop\\m3u8OverTest\\test.m3u8";
-
-        String rootPath = "C:\\Users\\NING MEI\\Desktop\\m3u8OverTest\\";
-
-
-//        String s = readFileContent(filePath);
-//       // System.out.println(s);
-//        String strings = getNewM3u8Test(rootPath, s);
-//        System.out.println(strings);
-//        newM3U8(filePath);
-        boolean b = m3u8FileOver(filePath);
-        System.out.println(b);
-    }
-
+    /**
+     * 生成 新的 m3u8文件
+     * @param M3u8Path
+     */
     public static void newM3U8(String M3u8Path){
         int i = 0;
         if (M3u8Path.contains("/")){
@@ -36,18 +24,18 @@ public class M3u8 {
         String strings  = getNewM3u8Test(m3u8RootPath, s);
 
         replace(M3u8Path,strings);
-
     }
 
+    /**
+     * 替换 文件内容
+     * @param fileName   文件的路径
+     * @param mess       需要替换的内容
+     */
     public static void replace(String fileName,String mess)
     {
         try
         {
             BufferedWriter out=new BufferedWriter(new FileWriter(fileName));
-//            out.write("Hello Kuka:");
-//            out.newLine();  //注意\n不一定在各种计算机上都能产生换行的效果
-//            out.write("  My name is coolszy!\n");
-//            out.write("  I like you and miss you。");
             String[] split = mess.split("\n");
             for (int i = 0; i < split.length; i++) {
                 out.write(split[i]);
@@ -126,7 +114,13 @@ public class M3u8 {
                 endTime = Integer.valueOf((int) (d*1000));
                 newTsTime.add(format);
             } else if (split[i].contains(".ts")) {
-                String tsPath = rootPath+ "\\"+ split[i];
+                String tsPath = "";
+                if (rootPath.contains("/")){
+                    tsPath=  rootPath+ "/"+ split[i];
+                }else if (rootPath.contains("\\")){
+                    tsPath = rootPath+"\\" +split[i];
+                }
+
                 bEnd = startTime+ fileSize(tsPath)+bEnd;
                 endTime= startTime+endTime;
                 String tsList = split[i];
@@ -143,6 +137,11 @@ public class M3u8 {
         return newMess;
     }
 
+    /**
+     * 读取 文件 大小 转成 long类型
+     * @param filePath  文件 路径
+     * @return
+     */
     private static long fileSize(String filePath){
         File file = new File(filePath);
         long length = file.length();
@@ -150,44 +149,14 @@ public class M3u8 {
     }
 
 
+
+
+
     /**
      * 判断 m3u8文件是否 切片完成
-     * @param m3u8Url
+     * @param m3u8Url  m3u8文件的 路径
      * @return
      */
-    public static boolean m3u8FileOver(String m3u8Url){
-       int num =0;
-       String spit ="";
-       if (m3u8Url.contains("/")){
-           num = m3u8Url.lastIndexOf("/");
-           spit= "/";
-       }else if (m3u8Url.contains("\\")){
-           num = m3u8Url.lastIndexOf("\\");
-           spit= "\\";
-       }
-
-       String rootPath = m3u8Url.substring(0,num);
-
-        String s = readFileContent(m3u8Url);
-        String[] split = s.split("\n");
-        List<String> tsList = new ArrayList<>();
-        for (int i = 0; i < split.length; i++) {
-            if (split[i].contains(".ts")){
-                tsList.add(split[i]);
-            }
-        }
-        String lastTsName = tsList.get(tsList.size() - 1);
-        String lastTsPath = rootPath+ spit+lastTsName;
-
-        System.out.println("最后一个ts 的路径玮："+lastTsPath);
-        File file = new File(lastTsPath);
-        if (file.exists()){
-            return true;
-        }else {
-            return false;
-        }
-    }
-
     public static boolean m3u8Over(String m3u8Url){
         String s = readFileContent(m3u8Url);
         String[] split = s.split("\n");
@@ -198,5 +167,20 @@ public class M3u8 {
         }
         return  false;
     }
+
+//    public static void main(String[] args) {
+////        String filePath = "C:\\Users\\NING MEI\\Desktop\\m3u8OverTest\\test.m3u8";
+////
+////        String rootPath = "C:\\Users\\NING MEI\\Desktop\\m3u8OverTest\\";
+////
+////
+////        String s = readFileContent(filePath);
+////       // System.out.println(s);
+////        String strings = getNewM3u8Test(rootPath, s);
+////        System.out.println(strings);
+//        String path = "/root/Downloads/mt9hdCAjlm/720P/mt9hdCAjlm-323001.m3u8";
+//        newM3U8(path);
+//
+//    }
 }
 

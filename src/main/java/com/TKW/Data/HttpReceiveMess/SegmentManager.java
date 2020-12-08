@@ -2,8 +2,6 @@ package com.TKW.Data.HttpReceiveMess;
 
 
 import lombok.Data;
-
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -48,5 +46,10 @@ public class SegmentManager {
      * 种子原视频文件的 大小
      */
     private String filmSize;
+
+    /**
+     * 电影 豆瓣 id值
+     */
+    private String douBanId;
 
 }

@@ -12,17 +12,6 @@ public class Segment {
 
     private static int SEGMENT_NUM = 10;
 
-    public static void main(String[] args) {
-        String film_id = "mt9hdCAjlm";
-        String btName = "";
-        int power =3;
-        String subtitileUrl = "";
-        List<String> list = segmentCmd(film_id, btName, power, subtitileUrl);
-
-        System.out.println(list.get(0));
-        System.out.println(list.get(1));
-    }
-
     /**
      * 进行切片任务
      * @param filmId      电影对应的 id值

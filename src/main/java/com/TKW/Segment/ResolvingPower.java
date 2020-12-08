@@ -16,7 +16,6 @@ public class ResolvingPower {
 
     public static final String GAOQING_RESLOVING_POWER = "768x432";
 
-
     public static final  String BIAOQING_RESLOVING_POWER = "384x216";
 
     public static final String CHAOQING_NAME ="323001";

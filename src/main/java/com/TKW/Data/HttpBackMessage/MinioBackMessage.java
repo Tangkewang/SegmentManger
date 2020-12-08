@@ -14,4 +14,9 @@ public class MinioBackMessage {
      */
     private String actualSize;
 
+    /**
+     * 上传 桶的路径
+     */
+    private String url;
+
 }

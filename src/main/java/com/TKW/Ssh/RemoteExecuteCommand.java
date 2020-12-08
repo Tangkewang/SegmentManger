@@ -29,9 +29,9 @@ public class RemoteExecuteCommand {
     //字符编码默认是utf-8
     private static String DEFAULTCHART = "UTF-8";
     private Connection conn;
-    private String ip ="";
-    private String userName ="";
-    private String userPwd ="";
+    private String ip ="62.210.249.200";
+    private String userName ="root";
+    private String userPwd ="Phliyundi888999";
 
     public RemoteExecuteCommand(String ip, String userName, String userPwd) {
         this.ip = ip;
@@ -75,7 +75,6 @@ public class RemoteExecuteCommand {
                 Session session = conn.openSession();//打开一个会话
                 session.execCommand(cmd);//执行命令
                 result = processStdout(session.getStdout(), DEFAULTCHART);
-                System.out.println(result);
                 //如果为得到标准输出为空，说明脚本执行出错了
                 if (StringUtils.isBlank(result)) {
                     result = processStdout(session.getStderr(), DEFAULTCHART);
@@ -250,6 +249,32 @@ public class RemoteExecuteCommand {
 //            bitTorrentList.add(bitTorrent);
         }
         return bitTorrentMap;
+    }
+
+    /**
+     * 判断现在的  cpu
+     * @return
+     */
+    public Double cpuState(){
+        String cmd = "sar -u 2 1";
+        String execute = execute(cmd);
+
+        String[] split = execute.split("\n");
+
+        String s = split[split.length - 1];
+
+        String[] s1 = s.split(" ");
+        List<String> list = new ArrayList<>();
+
+        for (int i = 0; i < s1.length; i++) {
+
+            if (s1[i].equals("")) {
+            } else {
+                list.add(s1[i]);
+            }
+        }
+
+        return Double.valueOf(list.get(2));
     }
 
 }

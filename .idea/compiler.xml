@@ -6,7 +6,9 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="Segment" />
         <module name="SegmentManger" />
+        <module name="java" />
       </profile>
     </annotationProcessing>
   </component>
